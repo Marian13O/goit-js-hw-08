@@ -1,36 +1,42 @@
 import throttle from 'lodash.throttle';
 
-/**
- * @type {HTMLFormElement} form
- */
-const form = document.querySelector('form.feedback-form');
-/** @type {{email: HTMLInputElement, message: HTMLTextAreaElement}} */
-const { email, message } = form.elements;
-const key = 'feedback-form-state';
-const formData = localStorage.getItem(key);
-/** @param {Event} _e */
-const saveForm = _e => {
-  localStorage.setItem(
-    key,
-    JSON.stringify({
-      email: email.value,
-      message: message.value,
-    })
-  );
+const feedbackForm = document.querySelector('.feedback-form');
+const emailInput = feedbackForm.querySelector('input[name="email"]');
+const messageTextarea = feedbackForm.querySelector('textarea[name="message"]');
+
+const STORAGE_KEY = 'feedback-form-state';
+
+const loadFormData = () => {
+  const savedData = localStorage.getItem(STORAGE_KEY);
+  if (savedData) {
+    const { email, message } = JSON.parse(savedData);
+    emailInput.value = email;
+    messageTextarea.value = message;
+  }
 };
 
-if (formData != null) {
-  const parsedFormData = JSON.parse(formData);
-  for (const key in parsedFormData) {
-    form[key].value = parsedFormData[key];
-  }
-}
-email.addEventListener('input', throttle(saveForm, 500, { leading: false }));
-message.addEventListener('input', throttle(saveForm, 500, { leading: false }));
+const saveFormData = throttle(() => {
+  const formData = {
+    email: emailInput.value,
+    message: messageTextarea.value,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+}, 500);
 
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  console.log(JSON.parse(localStorage.getItem(key)));
-  localStorage.removeItem(key);
-  form.reset();
+feedbackForm.addEventListener('input', () => {
+  saveFormData();
 });
+
+feedbackForm.addEventListener('submit', event => {
+  event.preventDefault();
+
+  const formData = {
+    email: emailInput.value,
+    message: messageTextarea.value,
+  };
+  console.log('Form submitted:', formData);
+
+  localStorage.removeItem(STORAGE_KEY);
+});
+
+loadFormData();

@@ -29,14 +29,16 @@ feedbackForm.addEventListener('input', () => {
 
 feedbackForm.addEventListener('submit', event => {
   event.preventDefault();
-
   const formData = {
     email: emailInput.value,
     message: messageTextarea.value,
   };
   console.log('Form submitted:', formData);
+  console.log('salut ca m am chinuit');
 
   localStorage.removeItem(STORAGE_KEY);
+  emailInput.value = '';
+  messageTextarea.value = '';
 });
 
 loadFormData();
